@@ -1,6 +1,9 @@
 import { Lexer, createToken } from "chevrotain";
 
-const Identifier = createToken({ name: "Identifier", pattern: /[a-zA-Z]\w*/ });
+const Identifier = createToken({
+	name: "Identifier",
+	pattern: /[a-zA-Z0-9]\w*/
+});
 
 const KeywordOrIdentifier = createToken({
 	name: "KeywordOrIdentifier",
@@ -13,9 +16,16 @@ const WhiteSpace = createToken({
 	group: Lexer.SKIPPED
 });
 
+const MozSubstitution = createToken({
+	name: "MozSubstitution",
+	pattern: /%{[\w\W]*%}/,
+	line_breaks: true,
+	group: Lexer.SKIPPED
+});
+
 const Comment = createToken({
 	name: "Comment",
-	pattern: /(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)/,
+	pattern: /(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)|(#.*)/,
 	group: "comments"
 });
 
@@ -24,7 +34,9 @@ const RCurlyBracket = createToken({ name: "RCurlyBracket", pattern: /\}/ });
 const LRoundBracket = createToken({ name: "LRoundBracket", pattern: /\(/ });
 const RRoundBracket = createToken({ name: "RRoundBracket", pattern: /\)/ });
 const Semicolon = createToken({ name: "Semicolon", pattern: /\;/ });
+const Colon = createToken({ name: "Colon", pattern: /\:/ });
 const Comma = createToken({ name: "Comma", pattern: /\,/ });
+const Equals = createToken({ name: "Equals", pattern: /\=/ });
 
 const Interface = createToken({
 	name: "Interface",
@@ -33,9 +45,9 @@ const Interface = createToken({
 	categories: [KeywordOrIdentifier]
 });
 
-const Attribute = createToken({
-	name: "Attribute",
-	pattern: /attribute/,
+const Declarator = createToken({
+	name: "Declarator",
+	pattern: /(attribute|const)/,
 	longer_alt: Identifier,
 	categories: [KeywordOrIdentifier]
 });
@@ -47,6 +59,13 @@ const ReadOnly = createToken({
 	categories: [KeywordOrIdentifier]
 });
 
+const ArgumentDirection = createToken({
+	name: "ArgumentDirection",
+	pattern: /(in|out)/,
+	longer_alt: Identifier,
+	categories: [KeywordOrIdentifier]
+});
+
 const Decorator = createToken({
 	name: "Decorator",
 	pattern: /\[([^]*?)\]/,
@@ -54,17 +73,22 @@ const Decorator = createToken({
 	categories: [KeywordOrIdentifier]
 });
 
-const Type = createToken({
-	name: "Type",
-	pattern: /(\w(\??))+/,
+const TypeWithIdentifier = createToken({
+	name: "TypeWithIdentifier",
+	pattern: /((\w(\??))+) ([a-zA-Z]\w*)/,
+	categories: [KeywordOrIdentifier]
+});
+
+const IntTypeSignedness = createToken({
+	name: "IntTypeSignedness",
+	pattern: /(signed|unsigned)/,
 	longer_alt: Identifier,
 	categories: [KeywordOrIdentifier]
 });
 
-const Bool = createToken({ name: "Bool", pattern: /bool/, categories: [Type] });
-
 const allTokens = [
 	WhiteSpace,
+	MozSubstitution,
 	Comment,
 	// Chars/types
 	LCurlyBracket,
@@ -72,16 +96,19 @@ const allTokens = [
 	LRoundBracket,
 	RRoundBracket,
 	Semicolon,
+	Colon,
 	Comma,
-	Bool,
+	Equals,
 	// Tokens
 	Interface,
-	Attribute,
+	Declarator,
 	ReadOnly,
 	Decorator,
+	ArgumentDirection,
+	IntTypeSignedness,
 	// The Identifier must appear after the keywords because all keywords are valid identifiers.
+	TypeWithIdentifier,
 	Identifier,
-	Type,
 	KeywordOrIdentifier
 ];
 
@@ -95,13 +122,16 @@ export {
 	LRoundBracket,
 	RRoundBracket,
 	Semicolon,
+	Colon,
 	Comma,
-	Bool,
+	Equals,
 	Interface,
-	Attribute,
+	Declarator,
 	ReadOnly,
 	Decorator,
-	Type,
+	ArgumentDirection,
+	IntTypeSignedness,
+	TypeWithIdentifier,
 	Identifier,
 	KeywordOrIdentifier
 };
