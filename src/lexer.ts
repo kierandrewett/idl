@@ -79,9 +79,9 @@ const TypeWithIdentifier = createToken({
 	categories: [KeywordOrIdentifier]
 });
 
-const IntTypeSignedness = createToken({
-	name: "IntTypeSignedness",
-	pattern: /(signed|unsigned)/,
+const IntTypeState = createToken({
+	name: "IntTypeState",
+	pattern: /(signed|unsigned|restricted|unrestricted)/,
 	longer_alt: Identifier,
 	categories: [KeywordOrIdentifier]
 });
@@ -105,7 +105,7 @@ const allTokens = [
 	ReadOnly,
 	Decorator,
 	ArgumentDirection,
-	IntTypeSignedness,
+	IntTypeState,
 	// The Identifier must appear after the keywords because all keywords are valid identifiers.
 	TypeWithIdentifier,
 	Identifier,
@@ -130,7 +130,7 @@ export {
 	ReadOnly,
 	Decorator,
 	ArgumentDirection,
-	IntTypeSignedness,
+	IntTypeState,
 	TypeWithIdentifier,
 	Identifier,
 	KeywordOrIdentifier

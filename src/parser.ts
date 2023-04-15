@@ -1,4 +1,4 @@
-import { CstParser, EmbeddedActionsParser, ILexingResult } from "chevrotain";
+import { CstNode, CstParser, EmbeddedActionsParser, ILexingResult, ParserMethod } from "chevrotain";
 import {
 	ArgumentDirection,
 	Colon,
@@ -8,7 +8,7 @@ import {
 	Decorator,
 	Equals,
 	Identifier,
-	IntTypeSignedness,
+	IntTypeState,
 	Interface,
 	KeywordOrIdentifier,
 	LCurlyBracket,
@@ -77,38 +77,31 @@ class Parser extends CstParser {
 			});
 
 			this.OPTION3(() => {
-				this.OR1([
-					{
-						ALT: () => {
-							this.CONSUME(ArgumentDirection);
-						}
-					},
-					{
-						ALT: () => {
-							this.CONSUME(Declarator);
-						}
-					}
-				]);
+				this.CONSUME(ArgumentDirection);
 			});
 
 			this.OPTION4(() => {
-				this.CONSUME(IntTypeSignedness);
+				this.CONSUME(Declarator);
 			});
 
-			this.OR2([
+			this.OPTION5(() => {
+				this.CONSUME(IntTypeState);
+			});
+
+			this.OR([
 				{
 					ALT: () => {
-						this.CONSUME(TypeWithIdentifier);
+						this.CONSUME(TypeWithIdentifier, { LABEL: "MemberName" });
 					}
 				},
 				{
 					ALT: () => {
-						this.CONSUME(Identifier);
+						this.CONSUME(Identifier, { LABEL: "MemberName" });
 					}
 				}
 			]);
 
-			this.OPTION5(() => {
+			this.OPTION6(() => {
 				this.CONSUME(Comma);
 			});
 		});
@@ -124,15 +117,13 @@ class Parser extends CstParser {
 				{
 					ALT: () => {
 						this.CONSUME(Equals);
-						this.CONSUME(Identifier);
+						this.CONSUME(Identifier, { LABEL: "DeclarationValue" });
 					}
 				},
 				{
 					// Function declaration
 					ALT: () => {
-						this.OPTION7(() => {
-							this.CONSUME(LRoundBracket);
-						});
+						this.CONSUME(LRoundBracket);
 
 						this.OPTION8(() => {
 							this.MANY(() => {
@@ -140,9 +131,7 @@ class Parser extends CstParser {
 							});
 						});
 
-						this.option(10, () => {
-							this.CONSUME(RRoundBracket);
-						});
+						this.CONSUME(RRoundBracket);
 					}
 				}
 			]);
@@ -161,5 +150,5 @@ export const parse = (lexed: ILexingResult) => {
 
 	const cst = (parser as any).idl();
 
-	return cst;
+	return cst as CstNode;
 };

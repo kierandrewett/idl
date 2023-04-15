@@ -14,7 +14,7 @@ interface nsIWebProgressListener;
 
 [ChromeOnly,
  Exposed=Window]
-interface FrameLoader : nsISupports, nsIObserver {
+interface Demo : nsISupports, nsIObserver {
   /**
    * Get the docshell from the frame loader.
    */
@@ -31,13 +31,13 @@ interface FrameLoader : nsISupports, nsIObserver {
   const long PREF_INT = 64;
   const long PREF_BOOL = 128;
 
-  // /**
-  //  * Get this frame loader's RemoteTab, if it has a remote frame.  Otherwise,
-  //  * returns null.
-  //  */
+  /**
+   * Get this frame loader's RemoteTab, if it has a remote frame.  Otherwise,
+   * returns null.
+   */
   readonly attribute bool remoteTab;
 
-  [HTMLConstructor] constructor(nsIWebProgressListener test, bool test);
+  [HTMLConstructor] constructor(nsIWebProgressListener test);
 
   void loadURI(in const unsigned long PREF_INVALID);
 
