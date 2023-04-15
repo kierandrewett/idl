@@ -6,6 +6,8 @@ import {
 	Comment,
 	Declarator,
 	Decorator,
+	Dictionary,
+	Enum,
 	Equals,
 	Identifier,
 	IntTypeState,
@@ -26,8 +28,12 @@ class Parser extends CstParser {
 		super(vocabulary, { nodeLocationTracking: "full", recoveryEnabled: true });
 
 		this.RULE("idl", () => {
-			this.MANY(() => {
+			this.MANY1(() => {
 				this.SUBRULE((this as any).interface);
+			});
+
+			this.MANY2(() => {
+				this.SUBRULE((this as any).enum);
 			});
 		});
 
@@ -35,8 +41,21 @@ class Parser extends CstParser {
 			this.OPTION1(() => {
 				this.CONSUME1(Decorator);
 			});
-			this.CONSUME(Interface);
-			this.CONSUME(Identifier, { LABEL: "InterfaceName" });
+			this.OR([
+				{
+					ALT: () => {
+						this.CONSUME(Interface);
+						this.CONSUME1(Identifier, { LABEL: "InterfaceName" });
+					}
+				},
+				{
+					ALT: () => {
+						this.CONSUME(Dictionary);
+						this.CONSUME2(Identifier, { LABEL: "DictionaryName" });
+					}
+				}
+			]);
+
 			this.OPTION2(() => {
 				this.CONSUME(Colon);
 				this.MANY(() => {
@@ -137,6 +156,18 @@ class Parser extends CstParser {
 			]);
 
 			this.CONSUME(Semicolon);
+		});
+
+		this.RULE("enum", () => {
+			this.CONSUME(Enum);
+			this.CONSUME(LCurlyBracket);
+
+			this.MANY(() => {
+				this.CONSUME(Identifier);
+				this.CONSUME(Comma);
+			});
+
+			this.CONSUME(RCurlyBracket);
 		});
 
 		this.performSelfAnalysis();

@@ -37,10 +37,27 @@ const Semicolon = createToken({ name: "Semicolon", pattern: /\;/ });
 const Colon = createToken({ name: "Colon", pattern: /\:/ });
 const Comma = createToken({ name: "Comma", pattern: /\,/ });
 const Equals = createToken({ name: "Equals", pattern: /\=/ });
+const Quote = createToken({ name: "Quote", pattern: /\"|\'/ });
+const LessThan = createToken({ name: "LessThan", pattern: /\</ });
+const GreaterThan = createToken({ name: "GreaterThan", pattern: /\>/ });
 
 const Interface = createToken({
 	name: "Interface",
 	pattern: /interface/,
+	longer_alt: Identifier,
+	categories: [KeywordOrIdentifier]
+});
+
+const Dictionary = createToken({
+	name: "Dictionary",
+	pattern: /dictionary/,
+	longer_alt: Identifier,
+	categories: [KeywordOrIdentifier]
+});
+
+const Enum = createToken({
+	name: "Enum",
+	pattern: /enum/,
 	longer_alt: Identifier,
 	categories: [KeywordOrIdentifier]
 });
@@ -75,7 +92,7 @@ const Decorator = createToken({
 
 const TypeWithIdentifier = createToken({
 	name: "TypeWithIdentifier",
-	pattern: /((\w(\??))+) ([a-zA-Z]\w*)/,
+	pattern: /(long )?(([a-zA-Z0-9<>:_](\??))+) ([a-zA-Z]\w*)/,
 	categories: [KeywordOrIdentifier]
 });
 
@@ -99,8 +116,13 @@ const allTokens = [
 	Colon,
 	Comma,
 	Equals,
+	Quote,
+	LessThan,
+	GreaterThan,
 	// Tokens
 	Interface,
+	Dictionary,
+	Enum,
 	Declarator,
 	ReadOnly,
 	Decorator,
@@ -125,7 +147,11 @@ export {
 	Colon,
 	Comma,
 	Equals,
+	LessThan,
+	GreaterThan,
 	Interface,
+	Dictionary,
+	Enum,
 	Declarator,
 	ReadOnly,
 	Decorator,

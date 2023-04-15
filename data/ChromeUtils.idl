@@ -1,0 +1,26 @@
+dictionary ProfilerMarkerOptions {
+    // A timestamp to use as the start time of the marker.
+    // If no start time is provided, the marker will have no duration.
+    // In window and ChromeWorker contexts, use a timestamp from
+    // `performance.now()`.
+    // In JS modules, use `Cu.now()` to get a timestamp.
+    DOMHighResTimeStamp startTime = 0;
+
+    // If captureStack is true, a profiler stack will be captured and associated
+    // with the marker.
+    boolean captureStack = false;
+
+    // Markers are created by default in the JavaScript category, but this can be
+    // overridden.
+    // Examples of correct values: "JavaScript", "Test", "Other", ...
+    // See ProfilingCategoryList.h for the complete list of valid values.
+    // Using an unrecognized value will set the category to "Other".
+    ByteString category = "JavaScript";
+
+    // Inner window ID to use for the marker. If the global object is a window,
+    // the inner window id of the marker will be set automatically.
+    // If a marker that relates to a specific window is added from a JS module,
+    // setting the inner window id will allow the profiler to show which window
+    // the marker applies to.
+    unsigned long long innerWindowId = 0;
+};

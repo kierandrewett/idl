@@ -3,6 +3,7 @@ export const typeBindings = {
 	octet: "number",
 	short: "number",
 	long: "number",
+	"long long": "number",
 	bool: "boolean",
 	float: "number",
 	double: "number",
@@ -13,5 +14,8 @@ export const typeBindings = {
 	jsstring: "string",
 	acstring: "string",
 	auto: "any",
-	void: "void"
+	void: "void",
+	"sequence<>": (generic: string) => {
+		return `${generic}[]`;
+	}
 };

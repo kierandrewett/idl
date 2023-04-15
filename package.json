@@ -5,13 +5,14 @@
     "license": "MIT",
     "scripts": {
         "dev": "yarn build && node dist/",
-        "build": "esbuild src/index.ts --bundle --outdir=dist --platform=node"
+        "build": "esbuild src/index.ts --bundle --outdir=dist --platform=node --external:canvas"
     },
     "dependencies": {
         "chalk": "^5.2.0",
         "chevrotain": "^10.5.0",
         "glob": "^10.1.0",
-        "js-beautify": "^1.14.7"
+        "js-beautify": "^1.14.7",
+        "jsdom": "^21.1.1"
     },
     "devDependencies": {
         "@types/glob": "^8.1.0",

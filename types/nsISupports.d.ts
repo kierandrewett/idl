@@ -1,5 +1,5 @@
 export interface nsISupports {
-	QueryInterface(aIID: unknown /* todo: nsISupports::nsIIDRef */, aInstancePtr: unknown /* todo: nsISupports::nsQIResult */): void;
-	AddRef: unknown /* todo: nsISupports::MozExternalRefCountType */;
-	Release: unknown /* todo: nsISupports::MozExternalRefCountType */;
+	QueryInterface(aIID: unknown /* todo: aIID: nsIIDRef */, aInstancePtr: unknown /* todo: aInstancePtr: nsQIResult */): void;
+	AddRef: unknown /* todo: AddRef: MozExternalRefCountType */;
+	Release: unknown /* todo: Release: MozExternalRefCountType */;
 }

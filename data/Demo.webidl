@@ -37,6 +37,8 @@ interface Demo : nsISupports, nsIObserver {
    */
   readonly attribute bool remoteTab;
 
+  readonly attribute sequence<string> myStrings;
+
   [HTMLConstructor] constructor(nsIWebProgressListener test);
 
   void loadURI(in const unsigned long PREF_INVALID);

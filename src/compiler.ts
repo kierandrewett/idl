@@ -18,6 +18,8 @@ import { typeBindings } from "./types";
 import beautify from "js-beautify";
 import * as glob from "glob";
 import chalk from "chalk";
+import { JSDOM } from "jsdom";
+import { globals } from "./globals";
 
 enum InterfacePropType {
 	Property,
@@ -38,8 +40,26 @@ interface InterfaceProp {
 	props?: InterfaceProp[];
 }
 
+interface EnumProp {
+	name: string;
+	value: string;
+}
+
 export const translateDataType = (dataType: string) => {
-	return typeBindings[dataType.toLowerCase()] || dataType;
+	let generics: string[] = [];
+
+	if (dataType.includes("<") && dataType.includes(">")) {
+		generics = generics.concat(dataType.split("<")[1].split(">")[0].split(","));
+		dataType = `${dataType.split("<")[0]}<>`;
+	}
+
+	const type = typeBindings[dataType.toLowerCase()] || dataType;
+
+	if (typeof type == "function") {
+		return type(...generics.map(translateDataType));
+	} else {
+		return type;
+	}
 };
 
 const flipObject = (obj: any) => {
@@ -73,20 +93,23 @@ export const compile = (
 			prop.declarationType !== InterfaceDeclarationType.Const &&
 			prop.dataType &&
 			!flipObject(typeBindings)[prop.dataType.toLowerCase()] &&
-			prop.dataType !== parse(idlPath).name
+			prop.dataType !== parse(idlPath).name &&
+			!flipObject(typeBindings)[prop.dataType.split("[]")[0].toLowerCase()]
 		) {
 			if (findIDLFileByName(prop.dataType)) {
 				if (!header.includes(`import { ${prop.dataType} }`)) {
 					header += `import { ${prop.dataType} } from "./${prop.dataType}";\n`;
 				}
+			} else if (globalThis[prop.dataType] || globals.find((g) => g == prop.dataType)) {
+				// Do nothing, our type is fine
 			} else {
 				console.warn(
 					`${chalk.yellow("WARN")}: Could not find data type for "${
-						prop.dataType
+						prop.dataType.split("[]")[0] // Remove the array bindings
 					}" at ${idlPath} on property "${prop.name}".`
 				);
 
-				prop.dataType = `unknown /* todo: ${parse(idlPath).name}::${prop.dataType} */`;
+				prop.dataType = `unknown /* todo: ${prop.name}: ${prop.dataType} */`;
 			}
 		}
 
@@ -152,11 +175,26 @@ export const compile = (
 		}
 	};
 
+	const createEnum = ({ name, props }: { name: string; props?: EnumProp[] }) => {
+		declaration += `export enum ${name} {\n`;
+
+		if (props && props.length > 0) {
+			for (const prop of props) {
+				if (prop.name) {
+					declaration += `\t${prop.name} = ${prop.value},\n`;
+				}
+			}
+		}
+	};
+
 	for (const [childName, child] of Object.entries(cst.children)) {
 		switch (childName) {
 			case "interface":
 				for (const { children, location } of child as CstNode[]) {
-					const name = (children.InterfaceName[0] as IToken).image;
+					const isDictionary = !!children.DictionaryName;
+					const name = isDictionary
+						? (children.DictionaryName[0] as IToken).image
+						: (children.InterfaceName[0] as IToken).image;
 					const extendInterfaces = ((children.InterfaceImplements as IToken[]) || [])
 						.map(
 							(token) =>
@@ -205,6 +243,11 @@ export const compile = (
 									} else if (splitName.length == 2) {
 										prop.dataType = translateDataType(splitName[0]);
 										prop.name = splitName[1];
+									} else if (splitName.length == 3) {
+										prop.dataType = translateDataType(
+											splitName.splice(0, 2).join(" ")
+										);
+										prop.name = splitName[0];
 									}
 								case ArgumentDirection.name:
 								case IntTypeState.name:
@@ -264,9 +307,19 @@ export const compile = (
 									childIndex + 1
 								][0] as IToken;
 
-								if (nextToken.tokenType == Identifier) {
+								if (
+									(!isDictionary && nextToken.tokenType == Identifier) ||
+									(nextToken.tokenType.LONGER_ALT &&
+										nextToken.tokenType.LONGER_ALT.toString() == "Identifier")
+								) {
 									prop.declarationType = InterfaceDeclarationType.Const;
-									prop.dataType = nextToken.image;
+									try {
+										prop.dataType = JSON.parse(
+											JSON.stringify(JSON.parse(nextToken.image))
+										);
+									} catch (e) {
+										prop.dataType = JSON.stringify(nextToken.image);
+									}
 								}
 							}
 
